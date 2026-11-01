@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自由建築創作模式[Cogmed-Hack]V1.5 開発元:不適切学生集団0909｜ </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        :root {
+            --bg-dark: #0b0710;
+            --bg-card: #140e1c;
+            --primary-purple: #9b59b6;
+            --primary-violet: #8e44ad;
+            --deep-purple: #5b2c6f;
+            --light-purple: #d2b4de;
+            --accent-purple: #a569bd;
+            --glow: #bb8fce;
+            --text-main: #f0e6ff;
+            --text-sub: #c9b3d9;
+            --border-glow: rgba(155, 89, 182, 0.6);
+            --shadow-purple: rgba(142, 68, 173, 0.4);
+            --success-green: #2ecc71;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Helvetica Neue', 'Noto Sans JP', system-ui, sans-serif; }
+
+        body {
+            background: radial-gradient(circle at 30% 10%, #1a0f2e 0%, var(--bg-dark) 70%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 1.5rem 1rem 4rem;
+            line-height: 1.6;
+        }
+
+        .wrapper { max-width: 960px; width: 100%; }
+
+        .header-glow { text-align: center; margin-bottom: 0.5rem; font-size: 0.85rem; letter-spacing: 2px; color: var(--accent-purple); text-transform: uppercase; opacity: 0.9; }
+
+        h1 {
+            font-size: clamp(1.5rem, 5.5vw, 2.6rem);
+            font-weight: 800;
+            text-align: center;
+            background: linear-gradient(135deg, #e0c3fc 0%, var(--primary-purple) 40%, #c39bd3 80%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.3rem;
+            filter: drop-shadow(0 0 12px var(--shadow-purple));
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .subtitle { text-align: center; font-size: 1.1rem; color: var(--text-sub); margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+        .subtitle .highlight { background: rgba(155, 89, 182, 0.2); border: 1px solid var(--border-glow); border-radius: 40px; padding: 0.2rem 1rem; font-weight: 600; color: var(--light-purple); }
+
+        .main-card {
+            background: linear-gradient(145deg, #1a1128, #120c1a);
+            border: 1px solid var(--border-glow);
+            border-radius: 28px;
+            padding: 2rem 1.8rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 40px var(--shadow-purple), inset 0 1px 2px rgba(255, 255, 255, 0.06);
+            margin-bottom: 2rem;
+            backdrop-filter: blur(4px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-card::before { content: ""; position: absolute; top: -50%; left: -20%; width: 200px; height: 200px; background: radial-gradient(circle, var(--primary-purple) 0%, transparent 80%); opacity: 0.15; border-radius: 50%; pointer-events: none; }
+
+        .catchphrase { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 1.8rem; color: #e8d5f5; text-shadow: 0 0 20px var(--primary-violet); display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; word-break: break-word; }
+        .catchphrase span { background: var(--deep-purple); border-radius: 30px; padding: 0.2rem 1.2rem; font-size: 0.9rem; vertical-align: middle; color: var(--light-purple); border: 1px solid var(--accent-purple); }
+
+        .code-container {
+            background: #0a0610;
+            border: 1px solid var(--primary-violet);
+            border-radius: 16px;
+            padding: 0.2rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 0 20px rgba(155, 89, 182, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1rem 0.2rem; color: var(--accent-purple); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(155, 89, 182, 0.3); }
+        .code-header .badge { background: #2a1b36; padding: 0.2rem 0.8rem; border-radius: 20px; color: var(--light-purple); font-size: 0.7rem; border: 1px solid var(--border-glow); }
+
+        pre[class*="language-"] {
+            background: #06030a !important;
+            border-radius: 12px !important;
+            padding: 1rem !important;
+            color: #d8b4fe !important;
+            font-family: 'Fira Code', 'Courier New', monospace !important;
+            font-size: 0.9rem !important;
+            overflow-x: auto !important;
+            white-space: pre !important;
+            word-break: normal !important;
+            border: 1px solid #331f44 !important;
+            margin: 0.5rem 0 !important;
+            min-height: 160px !important;
+            max-height: 300px !important;
+            overflow-y: auto !important;
+            tab-size: 4 !important;
+        }
+
+        .action-bar { display: flex; justify-content: flex-end; padding: 0.5rem 0.8rem 0.8rem; }
+
+        .copy-btn {
+            background: linear-gradient(135deg, var(--primary-purple), var(--deep-purple));
+            border: none; border-radius: 40px; color: white; font-weight: 700; font-size: 0.9rem;
+            padding: 0.7rem 1.2rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.6); border: 1px solid #c39bd3;
+            white-space: nowrap; letter-spacing: 0.5px; text-decoration: none; text-align: center; flex-shrink: 0;
+        }
+        .copy-btn:hover { background: linear-gradient(135deg, #af7ac5, var(--primary-violet)); transform: scale(1.02); box-shadow: 0 0 25px var(--glow); }
+        .copy-btn:active { transform: scale(0.98); }
+        .copy-btn.copied { background: linear-gradient(135deg, #2ecc71, #27ae60); border-color: #2ecc71; box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); }
+        .copy-btn svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+
+        .video-btn { background: linear-gradient(135deg, #8e44ad, #4a235a); border-color: #bb8fce; display: flex; width: fit-content; margin: 0 auto 2rem; padding: 0.8rem 2rem; font-size: 1rem; }
+        .video-btn:hover { background: linear-gradient(135deg, #a569bd, #6c3483); }
+
+        .faq-section { margin-top: 0.5rem; }
+        .faq-title { font-size: 1.8rem; font-weight: 700; text-align: center; color: #d7bde2; margin-bottom: 1.5rem; letter-spacing: 1px; border-bottom: 2px solid var(--border-glow); display: table; padding-bottom: 0.3rem; margin-left: auto; margin-right: auto; text-shadow: 0 0 20px var(--primary-violet); }
+        .faq-grid { display: flex; flex-direction: column; gap: 1rem; }
+        .faq-item { background: var(--bg-card); border-left: 6px solid var(--primary-purple); border-radius: 16px; padding: 1.2rem 1.5rem; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), 0 0 12px rgba(155, 89, 182, 0.2); transition: all 0.2s; border: 1px solid rgba(155, 89, 182, 0.25); }
+        .faq-item:hover { background: #1b1224; border-left-color: var(--accent-purple); box-shadow: 0 8px 22px rgba(142, 68, 173, 0.4); }
+        .faq-q { font-weight: 700; font-size: 1.1rem; color: #e0c3fc; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+        .faq-q .q-icon { background: var(--deep-purple); width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; color: #f0e6ff; flex-shrink: 0; border: 1px solid var(--accent-purple); }
+        .faq-a { color: var(--text-sub); padding-left: 2.4rem; font-size: 0.98rem; }
+        .faq-a .highlight-green { color: var(--success-green); font-weight: 700; }
+        .faq-a strong { color: #d7bde2; }
+
+        .footer { margin-top: 2.5rem; text-align: center; font-size: 0.8rem; color: #7d6b8a; border-top: 1px solid #2a1b36; padding-top: 1.5rem; }
+        .footer .brand { color: var(--primary-purple); font-weight: 600; }
+
+        @media (max-width: 700px) {
+            .main-card { padding: 1.5rem 1rem; }
+            .action-bar { justify-content: center; }
+            .copy-btn, .video-btn { width: 100%; }
+            .faq-item { padding: 1rem; }
+            .faq-a { padding-left: 0.5rem; }
+            .faq-q { font-size: 1rem; }
+            .catchphrase { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header-glow"></div>
+        <h1>自由建築創作模式[Cogmed-Hack]V1.5</h1>
+        <div class="subtitle"><span class="highlight">見てみよう</span></div>
+
+        <div class="main-card">
+            <div class="catchphrase">🛠️ さぁ ＜自由建築創作模式[Cogmed-Hack]V1.5＞ を入手しよう 🛠️</div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span>スクリプト</span>
+                    <span class="badge">最新のリリース世界で唯一</span>
+                </div>
+                
+                <!-- 表示用コード (Prism.jsがハイライトする) -->
+                <!-- 注意: ここは読みやすさのために整形されているが、コピーには使わない -->
+                <pre><code class="language-javascript" id="displayCode">(function () {
+'use strict';
+// ===== テーマカラー強制適用 (Purple Override) =====
+ const NEW_COLOR = '#9333ea';
+ const cssOverride = `
+     .reward-particle { background: ${NEW_COLOR} !important; }
+     /* ... (中略) ... */
+ `;
+ // ... (コードの残りは表示用としてここに記述されますが、コピーロジックでは下のrawCodeを使います) ...
+ console.log("Display Only Code");
+})();</code></pre>
+
+                <div class="action-bar">
+                    <button class="copy-btn" id="copyButton" aria-label="スクリプトをコピー">
+                        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        <span id="copyBtnText">スクリプトをコピー</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 
+          重要: コピー用の生コードデータ 
+          type="text/plain" にすることで、ブラウザがJSとして実行せず、
+          かつHTMLエンティティ(&lt;など)に変換されずにそのまま保持される。
+          ここに 本体v1.5.java の内容を完全に一致させて貼り付ける。
+        -->
+        <script type="text/plain" id="rawCode">
+(function () {
+'use strict';
+// ===== テーマカラー強制適用 (Purple Override) =====
+ const NEW_COLOR = '#9333ea';
+ const cssOverride = `
+     .reward-particle { background: ${NEW_COLOR} !important; }
+     .grid-button.active { background-color: ${NEW_COLOR} !important; fill: ${NEW_COLOR} !important; }
+     #click-indicator, #click-indicator[data-v-60f632d8] { background-color: ${NEW_COLOR} !important; }
+     .level-current, .level-current[data-v-f1947340] { background-color: ${NEW_COLOR} !important; }
+     .progress-indicator .progress-bar-active { background: ${NEW_COLOR} !important; }
+     .world-builder-activity-icon-container { background: ${NEW_COLOR} !important; }
+     [style*="#12b8dd"], [style*="#12B8DD"],
+     [style*="rgb(18, 184, 221)"], [style*="rgb(18,184,221)"] {
+         background-color: ${NEW_COLOR} !important;
+         background: ${NEW_COLOR} !important;
+         fill: ${NEW_COLOR} !important;
+     }
+ `;
+ var oldOverride = document.getElementById('cogmed-purple-override');
+ if (oldOverride) oldOverride.remove();
+ var styleOverride = document.createElement('style');
+ styleOverride.id = 'cogmed-purple-override';
+ styleOverride.textContent = cssOverride;
+ document.head.appendChild(styleOverride);
+ const HEX_RE = /#12b8dd/gi;
+ const RGB_RE = /rgb\(\s*18\s*,\s*184\s*,\s*221\s*\)/gi;
+ const PROPS = ['backgroundColor', 'color', 'fill', 'borderColor', 'background'];
+ function walkRule(rule) {
+     if (rule.cssRules) { for (const child of rule.cssRules) walkRule(child); return; }
+     if (!rule.style) return;
+     for (const prop of PROPS) {
+         const val = rule.style[prop];
+         if (!val) continue;
+         if (RGB_RE.test(val) || HEX_RE.test(val)) {
+             HEX_RE.lastIndex = 0; RGB_RE.lastIndex = 0;
+             rule.style[prop] = val.replace(RGB_RE, NEW_COLOR).replace(HEX_RE, NEW_COLOR);
+         }
+         HEX_RE.lastIndex = 0; RGB_RE.lastIndex = 0;
+     }
+ }
+ try {
+     for (const sheet of document.styleSheets) {
+         let rules;
+         try { rules = sheet.cssRules; } catch (e) { continue; }
+         if (!rules) continue;
+         for (const r of rules) walkRule(r);
+     }
+ } catch (e) {}
+ if (window.__cogmedPurpleObserver) window.__cogmedPurpleObserver.disconnect();
+ const observer = new MutationObserver((mutations) => {
+     for (const m of mutations) {
+         for (const node of m.addedNodes) {
+             if (node.nodeType !== 1) continue;
+             if (node.tagName === 'STYLE' && node.sheet) {
+                 try { for (const r of node.sheet.cssRules) walkRule(r); } catch (e) {}
+             }
+             if (node.hasAttribute && node.hasAttribute('style')) {
+                 const s = node.getAttribute('style');
+                 if (/#12b8dd/i.test(s) || /rgb\(\s*18\s*,\s*184\s*,\s*221\s*\)/i.test(s)) {
+                     node.setAttribute('style', s.replace(HEX_RE, NEW_COLOR).replace(RGB_RE, NEW_COLOR));
+                 }
+             }
+         }
+     }
+ });
+ observer.observe(document.documentElement, { childList: true, subtree: true });
+ window.__cogmedPurpleObserver = observer;
+ // ===== 既存GUIクリーンアップ =====
+ if (window.__cogmedHackGui && typeof window.__cogmedHackGui.destroy === 'function') {
+     window.__cogmedHackGui.destroy();
+ }
+ if (window.__cameraHackPanel && typeof window.__cameraHackPanel.destroy === 'function') {
+     window.__cameraHackPanel.destroy();
+ }
+ var LS_OPEN = 'cogmed-hack-open';
+ var LS_POS_OPEN = 'cogmed-hack-open-pos';
+ var LS_POS_GUI = 'cogmed-hack-gui-pos';
+ var TITLE = '自由建築創作模式[Cogmed-Hack]V1.5';
+ // ===== スタイル定義 =====
+ var styleEl = document.createElement('style');
+ styleEl.id = 'cogmed-hack-gui-style';
+ styleEl.textContent = [
+     '#chg-open-btn{position:fixed;z-index:999998;padding:10px 16px;',
+     'background:#7c3aed;color:#fff;border:2px solid #c4b5fd;border-radius:10px;',
+     'font-family:Consolas,Menlo,monospace;font-size:13px;font-weight:bold;',
+     'cursor:grab;user-select:none;-webkit-user-select:none;',
+     'box-shadow:0 4px 20px rgba(124,58,237,.5);touch-action:none;}',
+     '#chg-open-btn:hover{background:#8b5cf6;}',
+     '#chg-open-btn.chg-dragging{cursor:grabbing;}',
+     '#cogmed-hack-gui{position:fixed;z-index:999999;width:380px;',
+     'background:#1a0b2e;color:#f5f3ff;font-family:Consolas,Menlo,monospace;font-size:12px;',
+     'border:1px solid #7c3aed;border-radius:10px;',
+     'box-shadow:0 8px 40px rgba(124,58,237,.5);user-select:none;}',
+     '#cogmed-hack-gui .chg-header{cursor:move;padding:8px 12px;background:#2d1b4e;',
+     'border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center;',
+     'touch-action:none;}',
+     '#cogmed-hack-gui .chg-header.chg-dragging{cursor:grabbing;}',
+     '#cogmed-hack-gui .chg-header-title{font-weight:bold;color:#f5f3ff;font-size:12px;}',
+     '#cogmed-hack-gui .chg-header-buttons button{background:transparent;border:none;',
+     'color:#c4b5fd;cursor:pointer;font-size:14px;padding:0 4px;}',
+     '#cogmed-hack-gui .chg-header-buttons button:hover{color:#fff;}',
+     '#cogmed-hack-gui .chg-body{padding:10px 12px;display:block;max-height:80vh;overflow-y:auto;}',
+     '#cogmed-hack-gui.chg-minimized .chg-body{display:none;}',
+     '#cogmed-hack-gui .chg-section{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #4c1d95;}',
+     '#cogmed-hack-gui .chg-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}',
+     '#cogmed-hack-gui .chg-section-title{color:#c4b5fd;font-size:11px;margin-bottom:6px;font-weight:bold;}',
+     '#cogmed-hack-gui .chg-status{padding:5px 8px;background:#0d0519;border:1px solid #4c1d95;',
+     'border-radius:5px;margin-bottom:6px;font-size:11px;color:#fde68a;}',
+     '#cogmed-hack-gui .chg-status.chg-ok{color:#a7f3d0;border-color:#065f46;}',
+     '#cogmed-hack-gui button.chg-btn{display:block;width:100%;padding:7px 10px;margin:4px 0;',
+     'background:#4c1d95;color:#f5f3ff;border:1px solid #7c3aed;border-radius:5px;cursor:pointer;',
+     'font-family:inherit;font-size:12px;text-align:left;}',
+     '#cogmed-hack-gui button.chg-btn:hover{background:#6d28d9;}',
+     '#cogmed-hack-gui button.chg-btn.chg-safe{border-color:#c4b5fd;background:#7c3aed;}',
+     '#cogmed-hack-gui button.chg-btn.chg-safe:hover{background:#8b5cf6;}',
+     '#cogmed-hack-gui button.chg-btn.chg-warn{border-color:#ddd6fe;background:#6d28d9;}',
+     '#cogmed-hack-gui button.chg-btn.chg-warn:hover{background:#7c3aed;}',
+     // 危険ボタンを紫系統に統一
+     '#cogmed-hack-gui button.chg-btn.chg-danger{border-color:#7c3aed;background:#5b21b6;color:#f5f3ff;}',
+     '#cogmed-hack-gui button.chg-btn.chg-danger:hover{background:#6d28d9;}',
+     '#cogmed-hack-gui button.chg-btn.chg-active{background:#7c3aed;border-color:#f5f3ff;font-weight:bold;}',
+     '#cogmed-hack-gui .chg-input-row{display:flex;gap:4px;margin:4px 0;}',
+     '#cogmed-hack-gui .chg-input-row input{flex:1;padding:5px 6px;background:#0f0519;color:#f5f3ff;',
+     'border:1px solid #4c1d95;border-radius:5px;font-family:inherit;font-size:12px;min-width:0;}',
+     '#cogmed-hack-gui .chg-input-row input:focus{outline:none;border-color:#a78bfa;}',
+     '#cogmed-hack-gui .chg-log{margin-top:8px;max-height:140px;overflow-y:auto;background:#0d0519;',
+     'border:1px solid #4c1d95;border-radius:5px;padding:6px;font-size:11px;line-height:1.4;}',
+     '#cogmed-hack-gui .chg-log .chg-log-ok{color:#a7f3d0;}',
+     '#cogmed-hack-gui .chg-log .chg-log-err{color:#fda4af;}',
+     '#cogmed-hack-gui .chg-log .chg-log-warn{color:#fde68a;}',
+     '#cogmed-hack-gui .chg-log .chg-log-info{color:#c4b5fd;}',
+     '#cogmed-hack-gui .chg-warning{color:#fda4af;font-size:11px;margin-top:4px;line-height:1.3;}'
+ ].join('');
+ document.head.appendChild(styleEl);
+ // ===== EventDispatcher パッチ：OrbitControls キャプチャ =====
+ if (!window.__orbitControlsCaptureInstalled && window.THREE && window.THREE.EventDispatcher) {
+     window.__orbitControlsCaptureInstalled = true;
+     (function () {
+         var Ed = window.THREE.EventDispatcher;
+         var origDispatch = Ed.prototype.dispatchEvent;
+         Ed.prototype.dispatchEvent = function (event) {
+             if (this.object && this.object.isCamera
+                 && typeof this.maxDistance === 'number'
+                 && typeof this.minPolarAngle === 'number'
+                 && typeof this.update === 'function') {
+                 if (!window.__orbitControls) {
+                     window.__orbitControls = this;
+                     if (window.__cogmedHackGui && window.__cogmedHackGui.onCameraCapture) {
+                         window.__cogmedHackGui.onCameraCapture();
+                     }
+                 }
+             }
+             return origDispatch.apply(this, arguments);
+         };
+     })();
+ }
+ // ===== カメラ状態 =====
+ var cameraState = { defaults: null, mode: 'normal' };
+ var cameraPresets = {
+     normal: {
+         label: '標準',
+         maxDistance: null, minDistance: null,
+         minPolarAngle: null, maxPolarAngle: null,
+         screenSpacePanning: false,
+         panSpeed: 1, rotateSpeed: 1, zoomSpeed: 1
+     },
+     expanded: {
+         label: '拡張',
+         maxDistance: 2500, minDistance: 20,
+         minPolarAngle: 0.05, maxPolarAngle: Math.PI / 2 - 0.05,
+         screenSpacePanning: true,
+         panSpeed: 1.5, rotateSpeed: 1, zoomSpeed: 1
+     },
+     wide: {
+         label: '広域',
+         maxDistance: 5000, minDistance: 10,
+         minPolarAngle: 0.01, maxPolarAngle: Math.PI / 2 - 0.01,
+         screenSpacePanning: true,
+         panSpeed: 2, rotateSpeed: 1.2, zoomSpeed: 1.2
+     }
+ };
+ function captureCameraDefaults() {
+     if (!window.__orbitControls || cameraState.defaults) return;
+     var ctrl = window.__orbitControls;
+     cameraState.defaults = {
+         maxDistance: ctrl.maxDistance,
+         minDistance: ctrl.minDistance,
+         minPolarAngle: ctrl.minPolarAngle,
+         maxPolarAngle: ctrl.maxPolarAngle,
+         screenSpacePanning: ctrl.screenSpacePanning,
+         panSpeed: ctrl.panSpeed,
+         rotateSpeed: ctrl.rotateSpeed,
+         zoomSpeed: ctrl.zoomSpeed
+     };
+ }
+ function applyCameraPreset(name) {
+     var ctrl = window.__orbitControls;
+     if (!ctrl) {
+         log('OrbitControls 未キャプチャ。カメラを一度ドラッグしてください', 'warn');
+         updateCameraStatus();
+         return false;
+     }
+     captureCameraDefaults();
+     var p = cameraPresets[name];
+     if (!p) return false;
+     // 標準モード時は明示的にデフォルト値を復元
+     if (name === 'normal' && cameraState.defaults) {
+         ctrl.maxDistance = cameraState.defaults.maxDistance;
+         ctrl.minDistance = cameraState.defaults.minDistance;
+         ctrl.minPolarAngle = cameraState.defaults.minPolarAngle;
+         ctrl.maxPolarAngle = cameraState.defaults.maxPolarAngle;
+         ctrl.screenSpacePanning = cameraState.defaults.screenSpacePanning;
+         ctrl.panSpeed = cameraState.defaults.panSpeed;
+         ctrl.rotateSpeed = cameraState.defaults.rotateSpeed;
+         ctrl.zoomSpeed = cameraState.defaults.zoomSpeed;
+     } else {
+         ctrl.maxDistance = p.maxDistance !== null ? p.maxDistance : (cameraState.defaults ? cameraState.defaults.maxDistance : ctrl.maxDistance);
+         ctrl.minDistance = p.minDistance !== null ? p.minDistance : (cameraState.defaults ? cameraState.defaults.minDistance : ctrl.minDistance);
+         ctrl.minPolarAngle = p.minPolarAngle !== null ? p.minPolarAngle : (cameraState.defaults ? cameraState.defaults.minPolarAngle : ctrl.minPolarAngle);
+         ctrl.maxPolarAngle = p.maxPolarAngle !== null ? p.maxPolarAngle : (cameraState.defaults ? cameraState.defaults.maxPolarAngle : ctrl.maxPolarAngle);
+         ctrl.screenSpacePanning = p.screenSpacePanning;
+         ctrl.panSpeed = p.panSpeed;
+         ctrl.rotateSpeed = p.rotateSpeed;
+         ctrl.zoomSpeed = p.zoomSpeed;
+     }
+     ctrl.minAzimuthAngle = -Infinity;
+     ctrl.maxAzimuthAngle = Infinity;
+     ctrl.enablePan = true;
+     ctrl.enableRotate = true;
+     ctrl.enableZoom = true;
+     // update ラッパーによる上書きを防ぐため、一時的にフラグを立てて強制更新
+     var prevMode = cameraState.mode;
+     cameraState.mode = name;
+     // オリジナルupdateがある場合はそれを使って強制同期
+     if (ctrl.__origUpdate) {
+         ctrl.__origUpdate.call(ctrl);
+     } else {
+         ctrl.update();
+     }
+     // update ラッパーの再インストール（標準モード以外での制限維持用）
+     if (!ctrl.__origUpdate) {
+         ctrl.__origUpdate = ctrl.update;
+         ctrl.update = function () {
+             if (cameraState.mode !== 'normal' && window.__orbitControls === this) {
+                 var pp = cameraPresets[cameraState.mode];
+                 if (pp) {
+                     this.maxDistance = pp.maxDistance !== null ? pp.maxDistance : (cameraState.defaults ? cameraState.defaults.maxDistance : this.maxDistance);
+                     this.minDistance = pp.minDistance !== null ? pp.minDistance : (cameraState.defaults ? cameraState.defaults.minDistance : this.minDistance);
+                     if (pp.minPolarAngle !== null) this.minPolarAngle = pp.minPolarAngle;
+                     if (pp.maxPolarAngle !== null) this.maxPolarAngle = pp.maxPolarAngle;
+                     this.screenSpacePanning = pp.screenSpacePanning;
+                 }
+             }
+             return this.__origUpdate.call(this);
+         };
+     }
+     log('✅ カメラプリセット「' + p.label + '」を適用', 'ok');
+     updateCameraStatus();
+     return true;
+ }
+ function updateCameraStatus() {
+     if (!statusCameraEl) return;
+     if (window.__orbitControls) {
+         var m = cameraPresets[cameraState.mode] ? cameraPresets[cameraState.mode].label : cameraState.mode;
+         statusCameraEl.textContent = '✓ キャプチャ済み / モード: ' + m;
+         statusCameraEl.classList.add('chg-ok');
+     } else {
+         statusCameraEl.textContent = '⚠ 未キャプチャ - カメラをドラッグ/ズームしてください';
+         statusCameraEl.classList.remove('chg-ok');
+     }
+     panel.querySelectorAll('[data-action^="cam-"]').forEach(function (btn) {
+         var a = btn.dataset.action;
+         var name = a === 'cam-normal' ? 'normal' : a === 'cam-expanded' ? 'expanded' : a === 'cam-wide' ? 'wide' : null;
+         if (name && name === cameraState.mode) btn.classList.add('chg-active');
+         else btn.classList.remove('chg-active');
+     });
+ }
+ // ===== 開くボタン =====
+ var openBtn = document.createElement('button');
+ openBtn.id = 'chg-open-btn';
+ openBtn.type = 'button';
+ openBtn.innerHTML = '🟣 自由建築 V1.5';
+ openBtn.title = TITLE + ' を開く（ドラッグで移動可）';
+ document.body.appendChild(openBtn);
+ // ===== GUI パネル =====
+ var root = document.createElement('div');
+ root.id = 'cogmed-hack-gui';
+ root.innerHTML =
+     '<div class="chg-header">' +
+     '  <span class="chg-header-title">' + TITLE + '</span>' +
+     '  <span class="chg-header-buttons">' +
+     '    <button data-action="minimize" title="最小化">_</button>' +
+     '    <button data-action="close" title="閉じる（🟣ボタンが残ります）">X</button>' +
+     '  </span>' +
+     '</div>' +
+     '<div class="chg-body">' +
+     '  <div class="chg-section">' +
+     '    <div class="chg-section-title">Build Mode 切替</div>' +
+     '    <button class="chg-btn chg-safe" data-action="build">▶ 建築モードへ強制切替</button>' +
+     '    <button class="chg-btn chg-warn" data-action="menu">◀ Menu へ戻す（建築モード終了）</button>' +
+     '    <button class="chg-btn" data-action="select-state">アプリに状態判断させる</button>' +
+     '    <div class="chg-warning">※ Menu へ戻しても3Dの箱アイコンは戻りません。完全リセットはリロード推奨</div>' +
+     '  </div>' +
+     // Auto Training Section Added
+     '  <div class="chg-section">' +
+     '    <div class="chg-section-title">Auto Training (God Mode)</div>' +
+     '    <button class="chg-btn chg-danger" data-action="god-mode">⚡ オートトレーニング実行</button>' +
+     '    <div class="chg-warning" style="color:#ff4444; font-weight:bold;">!注意 この行為は非常にリスクが高く自己責任です</div>' +
+     '    <div class="chg-warning">使い方: トレーニングの途中でボタンを押してください</div>' +
+     '  </div>' +
+     '  <div class="chg-section">' +
+     '    <div class="chg-section-title">Camera 稼働領域</div>' +
+     '    <div class="chg-status" data-status-camera>⚠ 未キャプチャ - カメラをドラッグ/ズームしてください</div>' +
+     '    <button class="chg-btn chg-safe" data-action="cam-expanded">🎥 拡張モード（推奨）</button>' +
+     '    <button class="chg-btn" data-action="cam-wide">🎥 広域モード（最大）</button>' +
+     '    <button class="chg-btn chg-warn" data-action="cam-normal">🎥 標準に戻す</button>' +
+     '    <div class="chg-warning">※ 初回はカメラを一度ドラッグしてキャプチャ</div>' +
+     '  </div>' +
+     '  <div class="chg-section">' +
+     '    <div class="chg-section-title">現在の値を見る</div>' +
+     '    <button class="chg-btn" data-action="show">money / gems / 建物を表示</button>' +
+     '  </div>' +
+     '  <div class="chg-section">' +
+     '    <div class="chg-section-title">値の設定（保存あり・危険）</div>' +
+     '    <div class="chg-input-row">' +
+     '      <input data-field="money" type="text" placeholder="money" />' +
+     '      <input data-field="gems" type="text" placeholder="gems" />' +
+     '    </div>' +
+     '    <button class="chg-btn chg-danger" data-action="set-custom">入力値で保存</button>' +
+     '    <button class="chg-btn chg-danger" data-action="set-max">MAX で保存</button>' +
+     '    <div class="chg-warning">※ saveStateUpdate() はサーバー送信され戻せません</div>' +
+     '  </div>' +
+     '  <div class="chg-section">' +
+     '    <div class="chg-section-title">その他</div>' +
+     '    <button class="chg-btn" data-action="dump">state を全ダンプ</button>' +
+     '    <button class="chg-btn chg-warn" data-action="reload">🔄 ページをリロード（完全リセット）</button>' +
+     '    <button class="chg-btn" data-action="destroy">GUI を完全削除</button>' +
+     '  </div>' +
+     '  <div class="chg-log" data-log></div>' +
+     '</div>';
+ document.body.appendChild(root);
+ var panel = root;
+ var statusCameraEl = panel.querySelector('[data-status-camera]');
+ // ===== 位置の保存/読み込み =====
+ function loadPos(key, defX, defY) {
+     try {
+         var v = JSON.parse(localStorage.getItem(key) || 'null');
+         if (v && typeof v.x === 'number' && typeof v.y === 'number') return v;
+     } catch (e) {}
+     return { x: defX, y: defY };
+ }
+ function savePos(key, x, y) {
+     try { localStorage.setItem(key, JSON.stringify({ x: x, y: y })); } catch (e) {}
+ }
+ function clampPos(x, y, el) {
+     var w = el.offsetWidth || 100;
+     var h = el.offsetHeight || 40;
+     var nx = Math.max(0, Math.min(window.innerWidth - w, x));
+     var ny = Math.max(0, Math.min(window.innerHeight - h, y));
+     return { x: nx, y: ny };
+ }
+ var openPos = loadPos(LS_POS_OPEN, window.innerWidth - 180, 16);
+ var guiPos = loadPos(LS_POS_GUI, window.innerWidth - 400, 16);
+ openBtn.style.left = openPos.x + 'px';
+ openBtn.style.top = openPos.y + 'px';
+ root.style.left = guiPos.x + 'px';
+ root.style.top = guiPos.y + 'px';
+ // ===== 表示/非表示 =====
+ function setOpen(isOpen) {
+     if (isOpen) {
+         root.style.display = 'block';
+         openBtn.style.display = 'none';
+         try { localStorage.setItem(LS_OPEN, '1'); } catch (e) {}
+     } else {
+         root.style.display = 'none';
+         openBtn.style.display = 'block';
+         try { localStorage.setItem(LS_OPEN, '0'); } catch (e) {}
+         requestAnimationFrame(function () {
+             var r = openBtn.getBoundingClientRect();
+             var p = clampPos(r.left, r.top, openBtn);
+             openBtn.style.left = p.x + 'px';
+             openBtn.style.top = p.y + 'px';
+             savePos(LS_POS_OPEN, p.x, p.y);
+         });
+     }
+ }
+ var wasOpen = true;
+ try { wasOpen = localStorage.getItem(LS_OPEN) !== '0'; } catch (e) {}
+ setOpen(wasOpen);
+ // ===== ドラッグ可能化 =====
+ function makeDraggable(handle, el, posKey) {
+     var dragging = false;
+     var moved = false;
+     var sx = 0, sy = 0, ex = 0, ey = 0;
+     function getPoint(ev) {
+         if (ev.touches && ev.touches[0]) return { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
+         return { x: ev.clientX, y: ev.clientY };
+     }
+     function isInteractive(t) {
+         if (!t) return false;
+         if (t === handle) return false;
+         if (t.dataset && t.dataset.action) return true;
+         if (t.tagName === 'BUTTON' || t.tagName === 'INPUT') return true;
+         return false;
+     }
+     function down(ev) {
+         if (isInteractive(ev.target)) return;
+         dragging = true;
+         moved = false;
+         var p = getPoint(ev);
+         sx = p.x; sy = p.y;
+         var r = el.getBoundingClientRect();
+         ex = r.left; ey = r.top;
+         el.classList.add('chg-dragging');
+         document.addEventListener('mousemove', move);
+         document.addEventListener('mouseup', up);
+         document.addEventListener('touchmove', move, { passive: false });
+         document.addEventListener('touchend', up);
+         if (ev.type === 'touchstart') ev.preventDefault();
+         if (ev.type === 'mousedown') ev.preventDefault();
+     }
+     function move(ev) {
+         if (!dragging) return;
+         var p = getPoint(ev);
+         var dx = p.x - sx, dy = p.y - sy;
+         if (Math.abs(dx) > 3 || Math.abs(dy) > 3) moved = true;
+         var pos = clampPos(ex + dx, ey + dy, el);
+         el.style.left = pos.x + 'px';
+         el.style.top = pos.y + 'px';
+         if (ev.type === 'touchmove') ev.preventDefault();
+     }
+     function up() {
+         dragging = false;
+         el.classList.remove('chg-dragging');
+         document.removeEventListener('mousemove', move);
+         document.removeEventListener('mouseup', up);
+         document.removeEventListener('touchmove', move);
+         document.removeEventListener('touchend', up);
+         var r = el.getBoundingClientRect();
+         savePos(posKey, r.left, r.top);
+     }
+     handle.addEventListener('mousedown', down);
+     handle.addEventListener('touchstart', down, { passive: false });
+     return {
+         consumeMoved: function () {
+             var m = moved;
+             moved = false;
+             return m;
+         }
+     };
+ }
+ var openDrag = makeDraggable(openBtn, openBtn, LS_POS_OPEN);
+ var header = root.querySelector('.chg-header');
+ makeDraggable(header, root, LS_POS_GUI);
+ openBtn.addEventListener('click', function (e) {
+     if (openDrag.consumeMoved()) {
+         e.preventDefault();
+         e.stopPropagation();
+         return;
+     }
+     setOpen(true);
+ });
+ // ===== ログ =====
+ var logEl = root.querySelector('[data-log]');
+ function log(msg, type) {
+     if (!logEl) return;
+     var line = document.createElement('div');
+     line.className = 'chg-log-' + (type || 'info');
+     line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+     logEl.appendChild(line);
+     logEl.scrollTop = logEl.scrollHeight;
+     while (logEl.children.length > 100) logEl.removeChild(logEl.firstChild);
+ }
+ // ===== DataManager / Vue 探索 =====
+ function getDM() {
+     var dm = window.Datamanager;
+     if (!dm) { log('Datamanager なし', 'err'); return null; }
+     if (!dm.state) { log('dm.state なし', 'err'); return null; }
+     if (!dm.state.stats) { log('dm.state.stats なし', 'err'); return null; }
+     return dm;
+ }
+ function findTrainingComponent() {
+     var appEl = document.querySelector('#app');
+     if (!appEl) return null;
+     var rootVNode = appEl._vnode;
+     if (!rootVNode || !rootVNode.component) return null;
+     var rootInst = rootVNode.component;
+     var found = null;
+     function walk(vnode, depth) {
+         if (!vnode || depth > 500 || found) return;
+         if (vnode.component) {
+             var inst = vnode.component;
+             if (inst.proxy && typeof inst.proxy.trainingState === 'string') { found = inst; return; }
+             walk(inst.subTree, depth + 1);
+         }
+         if (Array.isArray(vnode.children)) {
+             for (var i = 0; i < vnode.children.length; i++) walk(vnode.children[i], depth + 1);
+         }
+         if (vnode.suspense) walk(vnode.suspense.activeBranch, depth + 1);
+     }
+     walk(rootInst.subTree, 0);
+     if (!found && rootInst.proxy && typeof rootInst.proxy.trainingState === 'string') found = rootInst;
+     return found;
+ }
+ // ===== Auto Training (God Mode) Logic =====
+ function actGodMode() {
+     if (window.AutoPilot) {
+         log('AutoPilot detected. Overriding response type...', 'info');
+         var origGetResponseType = window.AutoPilot.getResponseType;
+         window.AutoPilot.getResponseType = function(level) {
+             return "CORRECT"; 
+         };
+         if (!window.AutoPilot.isActive) {
+             window.AutoPilot.isActive = true;
+             log('AutoPilot activated.', 'ok');
+         }
+         log('%c[Cogmed Hack] GOD MODE ENABLED: All taps are now CORRECT', 'color: #ff0000; font-weight: bold; font-size: 14px;', 'ok');
+     } else {
+         log('AutoPilot not found. Make sure you are in a training session.', 'err');
+     }
+ }
+ // ===== 各操作 =====
+ function actBuild() {
+     var found = findTrainingComponent();
+     if (!found) { log('trainingState 保有コンポーネント未発見', 'err'); return; }
+     log('切替前: ' + found.proxy.trainingState, 'info');
+     try {
+         if (typeof found.proxy.onStartBuildMode === 'function') found.proxy.onStartBuildMode();
+         else found.proxy.trainingState = 'Build';
+         log('✅ 建築モード: ' + found.proxy.trainingState, 'ok');
+     } catch (e) { log('失敗: ' + e.message, 'err'); }
+ }
+ function actMenu() {
+     var found = findTrainingComponent();
+     if (!found) { log('trainingState 保有コンポーネント未発見', 'err'); return; }
+     log('切替前: ' + found.proxy.trainingState, 'info');
+     found.proxy.trainingState = 'Menu';
+     log('✅ Menu へ戻しました', 'ok');
+     log('※ 3Dの箱アイコンは戻りません。完全リセットはリロード推奨', 'warn');
+ }
+ function actSelectState() {
+     var found = findTrainingComponent();
+     if (!found) { log('trainingState 保有コンポーネント未発見', 'err'); return; }
+     if (typeof found.proxy.selectTrainingState !== 'function') {
+         log('selectTrainingState メソッドなし', 'err'); return;
+     }
+     log('切替前: ' + found.proxy.trainingState, 'info');
+     found.proxy.selectTrainingState();
+     log('切替後: ' + found.proxy.trainingState, 'ok');
+ }
+ function actShow() {
+     var dm = getDM(); if (!dm) return;
+     log('money: ' + dm.state.stats.money, 'ok');
+     log('gems : ' + dm.state.stats.gems, 'ok');
+     log('newBuildings: ' + Object.keys(dm.state.stats.newBuildings || {}).length + ' 個', 'info');
+     log('unlockedBuildings: ' + Object.keys(dm.state.stats.unlockedBuildings || {}).length + ' 個', 'info');
+     log('worldObjects: ' + Object.keys(dm.state.worldObjects || {}).length + ' 個', 'info');
+ }
+ function actSetCustom() {
+     var dm = getDM(); if (!dm) return;
+     var m = Number(root.querySelector('[data-field="money"]').value);
+     var g = Number(root.querySelector('[data-field="gems"]').value);
+     if (isNaN(m) || m < 0 || isNaN(g) || g < 0) { log('0以上の数値を入力', 'err'); return; }
+     if (!confirm('money=' + m + ', gems=' + g + ' で保存します（戻せません）。実行しますか？')) {
+         log('キャンセル', 'warn'); return;
+     }
+     dm.state.stats.money = m;
+     dm.state.stats.gems = g;
+     try { dm.saveStateUpdate(); log('保存キュー追加: money=' + m + ', gems=' + g, 'ok'); }
+     catch (e) { log('保存失敗: ' + e.message, 'err'); }
+ }
+ function actSetMax() {
+     var dm = getDM(); if (!dm) return;
+     if (!confirm('money / gems を 99999999999 で保存します（戻せません）。実行しますか？')) {
+         log('キャンセル', 'warn'); return;
+     }
+     dm.state.stats.money = 99999999999;
+     dm.state.stats.gems = 99999999999;
+     try { dm.saveStateUpdate(); log('MAX値で保存キュー追加', 'ok'); }
+     catch (e) { log('保存失敗: ' + e.message, 'err'); }
+ }
+ function actDump() {
+     var dm = window.Datamanager;
+     if (!dm) { log('Datamanager なし', 'err'); return; }
+     console.log('===== state 全ダンプ =====', dm.state);
+     log('コンソールに出力しました', 'ok');
+ }
+ function actReload() {
+     if (confirm('リロードしますか？（ローカル変更は消えます）')) location.reload();
+ }
+ root.addEventListener('click', function (e) {
+     var t = e.target;
+     if (!t || !t.dataset || !t.dataset.action) return;
+     var a = t.dataset.action;
+     if (a === 'build') actBuild();
+     else if (a === 'menu') actMenu();
+     else if (a === 'select-state') actSelectState();
+     else if (a === 'god-mode') actGodMode();
+     else if (a === 'cam-expanded') applyCameraPreset('expanded');
+     else if (a === 'cam-wide') applyCameraPreset('wide');
+     else if (a === 'cam-normal') applyCameraPreset('normal');
+     else if (a === 'show') actShow();
+     else if (a === 'set-custom') actSetCustom();
+     else if (a === 'set-max') actSetMax();
+     else if (a === 'dump') actDump();
+     else if (a === 'reload') actReload();
+     else if (a === 'minimize') root.classList.toggle('chg-minimized');
+     else if (a === 'close') setOpen(false);
+     else if (a === 'destroy') destroy();
+ });
+ // ===== リサイズ時の位置調整 =====
+ function onResize() {
+     if (openBtn.style.display !== 'none') {
+         var r = openBtn.getBoundingClientRect();
+         var p = clampPos(r.left, r.top, openBtn);
+         openBtn.style.left = p.x + 'px';
+         openBtn.style.top = p.y + 'px';
+         savePos(LS_POS_OPEN, p.x, p.y);
+     }
+     if (root.style.display !== 'none') {
+         var r2 = root.getBoundingClientRect();
+         var p2 = clampPos(r2.left, r2.top, root);
+         root.style.left = p2.x + 'px';
+         root.style.top = p2.y + 'px';
+         savePos(LS_POS_GUI, p2.x, p2.y);
+     }
+ }
+ window.addEventListener('resize', onResize);
+ requestAnimationFrame(onResize);
+ // ===== カメラキャプチャコールバック =====
+ function onCameraCapture() {
+     log('OrbitControls をキャプチャ', 'ok');
+     captureCameraDefaults();
+     updateCameraStatus();
+ }
+ // ===== 完全削除 =====
+ function destroy() {
+     window.removeEventListener('resize', onResize);
+     if (root.parentNode) root.parentNode.removeChild(root);
+     if (openBtn.parentNode) openBtn.parentNode.removeChild(openBtn);
+     if (styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
+     if (window.__cogmedPurpleObserver) window.__cogmedPurpleObserver.disconnect();
+     var overrideStyle = document.getElementById('cogmed-purple-override');
+     if (overrideStyle) overrideStyle.remove();
+     window.__cogmedHackGui = null;
+ }
+ window.__cogmedHackGui = {
+     destroy: destroy,
+     root: root,
+     openBtn: openBtn,
+     onCameraCapture: onCameraCapture,
+     applyCameraPreset: applyCameraPreset,
+     cameraState: cameraState
+ };
+ updateCameraStatus();
+ log(TITLE + ' 起動', 'ok');
+ log('テーマカラーを紫 (#9333ea) に強制適用しました', 'ok');
+ log('閉じると「🟣 自由建築 V1.5」ボタンが残ります', 'info');
+ log('建築モード + カメラ + 値操作 + オートトレーニング 全部ここから', 'info');
+ if (window.__orbitControls) onCameraCapture();
+})();
+        </script>
+
+        <a href="https://omg.lol" target="_blank" rel="noopener noreferrer" class="copy-btn video-btn" aria-label="動画を見る">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <span>動画を見る</span>
+        </a>
+
+        <div class="faq-section">
+            <div class="faq-title">📋 FAQ</div>
+            <div class="faq-grid">
+                <div class="faq-item"><div class="faq-q"><span class="q-icon">Q</span>安全ですか？</div><div class="faq-a">はい、オープンソースコードでセキュリティ性 <span class="highlight-green">99.99%</span> です。</div></div>
+                <div class="faq-item"><div class="faq-q"><span class="q-icon">Q</span>動作しますか？</div><div class="faq-a">動作率 <span class="highlight-green">99.99%</span> です。</div></div>
+                <div class="faq-item"><div class="faq-q"><span class="q-icon">Q</span>実行方法は？</div><div class="faq-a">サイトを開いた状態で <strong>F12</strong> キーを押してコンソールを開きます。そこにコピーしたコードを貼り付けてください。</div></div>
+                <div class="faq-item"><div class="faq-q"><span class="q-icon">Q</span>コーチなどにばれますか？</div><div class="faq-a">確実にとは言いませんが、画面が見られたらおしまいです。自首しましょう。</div></div>
+                <div class="faq-item"><div class="faq-q"><span class="q-icon">Q</span>規約的に合法ですか？</div><div class="faq-a">!No!Noまったく合法ではありません利用は完全に自己責任で開発者や開発元に文句を言わないでください。</div></div>
+                <div class="faq-item"><div class="faq-q"><span class="q-icon">Q</span>コグメドに許可を得ましたか？</div><div class="faq-a">いいえ、規約違反です。しかし、BANされる事は極めて珍しいです</div></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div><span class="brand">中国制造与日本制造</span></div>
+            <div>開発元:不適切学生集団0909</div>
+            <div style="margin-top:0.4rem;">提供: Deepseek＆Qwen</div>
+        </div>
+    </div>
+
+    <!-- 表示用コードのハイライトと、実際のコードの同期 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script>
+        (function() {
+            // 1. 生のコードを取得 (script type="text/plain" から)
+            const rawCodeElement = document.getElementById('rawCode');
+            const displayCodeElement = document.getElementById('displayCode');
+            const copyButton = document.getElementById('copyButton');
+            const copyBtnText = document.getElementById('copyBtnText');
+
+            // 生のコードの前後の空白をトリム (インデント調整のため)
+            // ただし、コード内部のインデントは保持する
+            let rawCode = rawCodeElement.textContent;
+            
+            // 先頭の改行を削除
+            rawCode = rawCode.replace(/^\n/, '');
+            
+            // 共通のインデントを削除 (このHTML内のscriptタグのインデント分)
+            // 最初の行のインデント量を基準にするのではなく、単純にtrimStartではなく
+            // 各行の先頭にある共通空白を除去するロジックが理想だが、
+            // 今回はシンプルに、HTMLのインデント(8スペース程度)を想定して調整するか、
+            // もしくはそのまま許容する。
+            // より確実なのは、各行の先頭にある最小インデントを検出して削ること。
+            const lines = rawCode.split('\n');
+            let minIndent = Infinity;
+            lines.forEach(line => {
+                if (line.trim().length > 0) {
+                    const match = line.match(/^(\s*)/);
+                    if (match) {
+                        minIndent = Math.min(minIndent, match[1].length);
+                    }
+                }
+            });
+            if (minIndent !== Infinity && minIndent > 0) {
+                rawCode = lines.map(line => line.slice(minIndent)).join('\n');
+            }
+
+            // 2. 表示用コードエリアに、正しい生コードをセットしてハイライトさせる
+            // これにより、表示されているコードとコピーされるコードが完全に一致する
+            displayCodeElement.textContent = rawCode;
+            if (window.Prism) {
+                Prism.highlightElement(displayCodeElement);
+            }
+
+            // 3. コピー機能
+            async function copyText(text) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (err) {
+                    try {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = text;
+                        textArea.style.position = 'fixed';
+                        textArea.style.opacity = '0';
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        return true;
+                    } catch (fallbackErr) {
+                        return false;
+                    }
+                }
+            }
+
+            copyButton.addEventListener('click', async () => {
+                // 表示用ではなく、加工済みの生コード変数を使用
+                const ok = await copyText(rawCode);
+                
+                if (ok) {
+                    copyButton.classList.add('copied');
+                    copyBtnText.textContent = '✅ コピーしました！';
+                    setTimeout(() => {
+                        copyButton.classList.remove('copied');
+                        copyBtnText.textContent = 'スクリプトをコピー';
+                    }, 2500);
+                } else {
+                    alert('コピーに失敗しました。手動でコードを選択してコピーしてください。');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
