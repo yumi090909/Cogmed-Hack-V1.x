@@ -176,7 +176,8 @@
         </div>
 
         <!-- 
-          重要: コピー用の生コードデータ (V1.6 Updated)
+          重要: コピー用の生コードデータ (V1.6)
+          ここに新しいスクリプトを完全に一致させて貼り付けます。
         -->
         <script type="text/plain" id="rawCode">
 (function () {
@@ -510,7 +511,6 @@
         '    <button class="chg-btn" data-action="apply-params">⚙️ パラメータ更新</button>' +
         '    <div class="chg-warning">説明: わざと性能を下げて安定させます</div>' +
         '  </div>' +
-        // Level Hack Section REMOVED as requested
         '  <div class="chg-section">' +
         '    <div class="chg-section-title">Camera 稼働領域</div>' +
         '    <div class="chg-status" data-status-camera>⚠ 未キャプチャ - カメラをドラッグ/ズームしてください</div>' +
@@ -720,32 +720,32 @@
 
     // ===== Auto Training Logic =====
     
-    // GOD MODE (Existing)
-    var originalGetResponseType = null;
-
+    // GOD MODE (Fixed: Set strategy.type to "correct")
     function actGodMode() {
         if (window.AutoPilot) {
-            log('AutoPilot detected. Overriding response type...', 'info');
-            if (!originalGetResponseType) originalGetResponseType = window.AutoPilot.getResponseType;
-            window.AutoPilot.getResponseType = function(level) {
-                return "CORRECT"; 
-            };
+            log('AutoPilot detected. Setting strategy to "correct"...', 'info');
+            
+            // Set strategy to "correct" for GOD MODE
+            window.AutoPilot.strategy = { type: "correct" };
+            
             if (!window.AutoPilot.isActive) {
                 window.AutoPilot.isActive = true;
                 log('AutoPilot activated.', 'ok');
             }
+            
             log('%c[Cogmed Hack] GOD MODE ENABLED: All taps are now CORRECT', 'color: #ff0000; font-weight: bold; font-size: 14px;', 'ok');
         } else {
             log('AutoPilot not found. Make sure you are in a training session.', 'err');
         }
     }
 
-    // AUTO V2 (Stable Mode) - Updated Defaults & Logic
+    // AUTO V2 (Stable Mode) - Fixed Logic using AutoPilot Hook
     var autoVInterval = null;
     var autoVParams = {
         errorRate: 46, // Default 46%
         delayMs: 1300  // Default 1.3s
     };
+    var originalGetResponseType = null;
 
     function actApplyParams() {
         var errorRateInput = root.querySelector('[data-field="error-rate"]');
@@ -760,12 +760,6 @@
         if (isNaN(dl) || dl < 0) dl = 1.3;
         autoVParams.delayMs = dl * 1000;
 
-        // Apply delay to AutoPilot if active
-        if (window.AutoPilot) {
-            window.AutoPilot.clickDelay = autoVParams.delayMs;
-            window.AutoPilot.speedFactor = 1.0; 
-        }
-
         log('✅ パラメータを更新しました (ミス率: ' + autoVParams.errorRate + '%, 遅延: ' + dl + 's)', 'ok');
     }
 
@@ -774,14 +768,17 @@
             clearInterval(autoVInterval);
             autoVInterval = null;
             
+            // Restore original AutoPilot behavior if hooked
             if (window.AutoPilot && originalGetResponseType) {
                 window.AutoPilot.getResponseType = originalGetResponseType;
+                originalGetResponseType = null;
                 log('AutoPilot restored to original.', 'info');
             }
             
+            // Reset speed factor
             if (window.AutoPilot) {
-                window.AutoPilot.speedFactor = 0.001;
-                window.AutoPilot.clickDelay = 200;
+                window.AutoPilot.speedFactor = 0.001; // Default fast
+                window.AutoPilot.clickDelay = 200;    // Default fast
             }
 
             log('⏹ オートトレーニングV2 を停止しました', 'warn');
@@ -801,16 +798,27 @@
             originalGetResponseType = window.AutoPilot.getResponseType;
         }
 
+        // Set strategy to "random" for AUTO V2
+        window.AutoPilot.strategy = { 
+            type: "random", 
+            maxLevel: 10, 
+            seed: Math.random() * 1000 
+        };
+
         window.AutoPilot.getResponseType = function(level) {
+            // Determine if we should make a mistake based on configured rate
             var roll = Math.random() * 100;
             if (roll < autoVParams.errorRate) {
+                // Intentional Mistake
+                // Randomly choose between Major and Minor error
                 return Math.random() > 0.5 ? "ERROR_MAJOR" : "ERROR_MINOR";
             }
             return "CORRECT";
         };
 
+        // Configure Delay
         window.AutoPilot.clickDelay = autoVParams.delayMs;
-        window.AutoPilot.speedFactor = 1.0;
+        window.AutoPilot.speedFactor = 1.0; // Real-time scale
 
         if (!window.AutoPilot.isActive) {
             window.AutoPilot.isActive = true;
@@ -980,7 +988,7 @@
 })();
         </script>
 
-        <a href="https://youtu.be/3BOwIbz6I3g?si=uqfFX2XWLF5O8Cbn" target="_blank" rel="noopener noreferrer" class="copy-btn video-btn" aria-label="動画を見る">
+        <a href="https://omg.lol" target="_blank" rel="noopener noreferrer" class="copy-btn video-btn" aria-label="動画を見る">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             <span>動画を見る</span>
         </a>
@@ -999,7 +1007,7 @@
 
         <div class="footer">
             <div><span class="brand">中国制造与日本制造</span></div>
-            <div>開発元: 0909Group</div>
+            <div>開発元:0909Group</div>
             <div style="margin-top:0.4rem;">提供: Deepseek＆Qwen</div>
         </div>
     </div>
