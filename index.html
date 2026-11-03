@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自由建築創作模式[Cogmed-Hack]V1.6 開発元:不適切学生集団0909｜ </title>
+    <title>自由建築創作模式[Cogmed-Hack]V1.6 開発元:0909Group｜ </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     <style>
         :root {
@@ -176,8 +176,7 @@
         </div>
 
         <!-- 
-          重要: コピー用の生コードデータ (V1.6)
-          ここに新しいスクリプトを完全に一致させて貼り付けます。
+          重要: コピー用の生コードデータ (V1.6 Updated)
         -->
         <script type="text/plain" id="rawCode">
 (function () {
@@ -262,7 +261,7 @@
     var LS_OPEN = 'cogmed-hack-open';
     var LS_POS_OPEN = 'cogmed-hack-open-pos';
     var LS_POS_GUI = 'cogmed-hack-gui-pos';
-    var TITLE = '自由建築創作模式[Cogmed-Hack]V1.6'; // バージョン固定
+    var TITLE = '自由建築創作模式[Cogmed-Hack]V1.6';
 
     // ===== スタイル定義 =====
     var styleEl = document.createElement('style');
@@ -497,30 +496,21 @@
         '    <button class="chg-btn" data-action="select-state">アプリに状態判断させる</button>' +
         '    <div class="chg-warning">※ Menu へ戻しても3Dの箱アイコンは戻りません。完全リセットはリロード推奨</div>' +
         '  </div>' +
-        // Auto Training Section (Updated Defaults)
+        // Auto Training Section (Updated Defaults & Params Button)
         '  <div class="chg-section">' +
         '    <div class="chg-section-title">Auto Training V2</div>' +
         '    <button class="chg-btn chg-danger" data-action="god-mode">⚡ GOD MODE (即時・全正解)</button>' +
         '    <div class="chg-warning" style="color:#ff4444; font-weight:bold;">!注意 この行為は非常にリスクが高く自己責任です</div>' +
-        '    <div class="chg-warning">使い方: トレーニングの途中でボタンを押してください</div>' +
         '    <hr style="border-color:#4c1d95; margin:8px 0;">' +
         '    <button class="chg-btn chg-safe" data-action="auto-v">⏱ オートトレーニングV2 (安定化)</button>' +
         '    <div class="chg-input-row">' +
-        '      <input data-field="error-rate" type="text" placeholder="ミス率(%)" value="46" />' + // Default 46
-        '      <input data-field="delay-time" type="text" placeholder="Delay (s)" value="1.3" />' + // Default 1.3
+        '      <input data-field="error-rate" type="text" placeholder="ミス率(%)" value="46" />' +
+        '      <input data-field="delay-time" type="text" placeholder="Delay (s)" value="1.3" />' +
         '    </div>' +
         '    <button class="chg-btn" data-action="apply-params">⚙️ パラメータ更新</button>' +
         '    <div class="chg-warning">説明: わざと性能を下げて安定させます</div>' +
         '  </div>' +
-        // Training Level Section (Fixed Logic)
-        '  <div class="chg-section">' +
-        '    <div class="chg-section-title">Training Level 改ざん</div>' +
-        '    <div class="chg-status" data-status-level>⚠ アクティビティを選択してください</div>' +
-        '    <div class="chg-input-row"><input data-field="level-val" type="text" placeholder="Level Value" /></div>' +
-        '    <button class="chg-btn" data-action="read-level">🔄 レベル読込</button>' +
-        '    <button class="chg-btn chg-danger" data-action="write-level">💾 レベル適用</button>' +
-        '    <div class="chg-warning">※ 現在のアクティビティまたは全アクティビティに適用されます</div>' +
-        '  </div>' +
+        // Level Hack Section REMOVED as requested
         '  <div class="chg-section">' +
         '    <div class="chg-section-title">Camera 稼働領域</div>' +
         '    <div class="chg-status" data-status-camera>⚠ 未キャプチャ - カメラをドラッグ/ズームしてください</div>' +
@@ -555,7 +545,6 @@
 
     var panel = root;
     var statusCameraEl = panel.querySelector('[data-status-camera]');
-    var statusLevelEl = panel.querySelector('[data-status-level]');
 
     // ===== 位置の保存/読み込み =====
     function loadPos(key, defX, defY) {
@@ -732,10 +721,12 @@
     // ===== Auto Training Logic =====
     
     // GOD MODE (Existing)
+    var originalGetResponseType = null;
+
     function actGodMode() {
         if (window.AutoPilot) {
             log('AutoPilot detected. Overriding response type...', 'info');
-            var origGetResponseType = window.AutoPilot.getResponseType;
+            if (!originalGetResponseType) originalGetResponseType = window.AutoPilot.getResponseType;
             window.AutoPilot.getResponseType = function(level) {
                 return "CORRECT"; 
             };
@@ -749,11 +740,11 @@
         }
     }
 
-    // AUTO V2 (Stable Mode) - Updated Defaults
+    // AUTO V2 (Stable Mode) - Updated Defaults & Logic
     var autoVInterval = null;
     var autoVParams = {
-        errorRate: 46, // Changed from 8
-        delayMs: 1300  // Changed from 2700
+        errorRate: 46, // Default 46%
+        delayMs: 1300  // Default 1.3s
     };
 
     function actApplyParams() {
@@ -766,8 +757,14 @@
         autoVParams.errorRate = er;
 
         var dl = parseFloat(delayInput.value);
-        if (isNaN(dl) || dl < 0) dl = 1.3; // Default fallback updated
+        if (isNaN(dl) || dl < 0) dl = 1.3;
         autoVParams.delayMs = dl * 1000;
+
+        // Apply delay to AutoPilot if active
+        if (window.AutoPilot) {
+            window.AutoPilot.clickDelay = autoVParams.delayMs;
+            window.AutoPilot.speedFactor = 1.0; 
+        }
 
         log('✅ パラメータを更新しました (ミス率: ' + autoVParams.errorRate + '%, 遅延: ' + dl + 's)', 'ok');
     }
@@ -776,112 +773,54 @@
         if (autoVInterval) {
             clearInterval(autoVInterval);
             autoVInterval = null;
+            
+            if (window.AutoPilot && originalGetResponseType) {
+                window.AutoPilot.getResponseType = originalGetResponseType;
+                log('AutoPilot restored to original.', 'info');
+            }
+            
+            if (window.AutoPilot) {
+                window.AutoPilot.speedFactor = 0.001;
+                window.AutoPilot.clickDelay = 200;
+            }
+
             log('⏹ オートトレーニングV2 を停止しました', 'warn');
+            return;
+        }
+
+        if (!window.AutoPilot) {
+            log('AutoPilot not found. Start a training first.', 'err');
             return;
         }
 
         // Apply params on start as well
         actApplyParams();
 
-        log('▶ オートトレーニングV2 を開始', 'ok');
-        log('  応答時間: ' + (autoVParams.delayMs/1000) + 's 固定', 'info');
+        // Hook AutoPilot
+        if (!originalGetResponseType) {
+            originalGetResponseType = window.AutoPilot.getResponseType;
+        }
 
-        autoVInterval = setInterval(function() {
-            // Check for Next Button (Modal)
-            var nextBtn = document.querySelector('.modal-card:not([style*="display: none"]) .button.is-primary');
-            if (nextBtn && !nextBtn.disabled) {
-                setTimeout(function() {
-                    nextBtn.click();
-                    log('➡ Nextボタンを自動クリック', 'info');
-                }, 500);
-                return;
+        window.AutoPilot.getResponseType = function(level) {
+            var roll = Math.random() * 100;
+            if (roll < autoVParams.errorRate) {
+                return Math.random() > 0.5 ? "ERROR_MAJOR" : "ERROR_MINOR";
             }
+            return "CORRECT";
+        };
 
-            // Check for Active Grid Buttons
-            var buttons = Array.from(document.querySelectorAll('.grid-button:not(.inactive)'));
-            if (buttons.length === 0) return;
+        window.AutoPilot.clickDelay = autoVParams.delayMs;
+        window.AutoPilot.speedFactor = 1.0;
 
-            var candidateIndex = Math.floor(Math.random() * buttons.length);
-            var targetBtn = buttons[candidateIndex];
-
-            // Intentional Mistake Logic
-            if (Math.random() * 100 < autoVParams.errorRate) {
-                var wrongIndex = (candidateIndex + 1) % buttons.length;
-                targetBtn = buttons[wrongIndex];
-                log('❌ 意図的なミスを実行 (' + autoVParams.errorRate + '%)', 'warn');
-            }
-
-            // Execute Click with Delay
-            setTimeout(function() {
-                if (targetBtn && document.body.contains(targetBtn)) {
-                    targetBtn.click();
-                }
-            }, autoVParams.delayMs);
-
-        }, 1000);
-    }
-
-    // ===== Training Level Logic (Fixed) =====
-    function actReadLevel() {
-        var dm = getDM();
-        if (!dm || !dm.state || !dm.state.activities) {
-            log('Datamanager または activities が見つかりません', 'err');
-            return;
-        }
-        
-        // activities は2次元配列 [[Activity, Activity...], ...]
-        // 現在のブロックのアクティビティリストを取得
-        var currentBlockActivities = dm.state.activities[0]; 
-        if (!currentBlockActivities || currentBlockActivities.length === 0) {
-            log('現在のブロックにアクティビティがありません', 'warn');
-            return;
+        if (!window.AutoPilot.isActive) {
+            window.AutoPilot.isActive = true;
         }
 
-        // 簡易的に最初のアクティビティのレベルを表示（本来は選択中を取得すべきだがGUIにセレクタがないため）
-        // ユーザーが特定のアクティビティを指定したい場合は、入力欄にインデックスを入れるなどの拡張が必要だが、
-        // ここでは「全アクティビティの平均」または「最初のもの」を表示する挙動にする。
-        // 要望に合わせて「現在選択中」をとりたいが、DOMから特定するのは困難なため、
-        // まずは安全に取得できる値を表示する。
-        
-        var firstAct = currentBlockActivities[0];
-        if (firstAct && firstAct.state) {
-            var lvl = firstAct.state.currentLevel;
-            root.querySelector('[data-field="level-val"]').value = lvl;
-            statusLevelEl.textContent = '✓ レベル読込完了 (ID: ' + firstAct.type + '): ' + lvl;
-            statusLevelEl.classList.add('chg-ok');
-            log('レベルを読み込みました: ' + lvl, 'ok');
-        } else {
-            log('レベル情報の取得に失敗しました', 'warn');
-        }
-    }
+        log('▶ オートトレーニングV2 を開始 (AutoPilot Sync)', 'ok');
+        log('  ミス率: ' + autoVParams.errorRate + '% / 遅延: ' + (autoVParams.delayMs/1000) + 's', 'info');
 
-    function actWriteLevel() {
-        var val = parseFloat(root.querySelector('[data-field="level-val"]').value);
-        if (isNaN(val)) {
-            log('有効な数値を入力してください', 'err');
-            return;
-        }
-        
-        var dm = getDM();
-        if (!dm || !dm.state || !dm.state.activities) {
-            log('Datamanager が見つかりません', 'err');
-            return;
-        }
-
-        var currentBlockActivities = dm.state.activities[0];
-        if (!currentBlockActivities) return;
-
-        // 全アクティビティに適用（ユーザーの入力値で上書き）
-        var count = 0;
-        currentBlockActivities.forEach(function(act) {
-            if (act.state) {
-                act.state.currentLevel = val;
-                count++;
-            }
-        });
-
-        log('✅ ' + count + '個のアクティビティのレベルを ' + val + ' に設定しました', 'ok');
-        statusLevelEl.textContent = '✓ レベル適用済み: ' + val;
+        // Keep-alive loop
+        autoVInterval = setInterval(function() {}, 1000);
     }
 
     // ===== 各操作 =====
@@ -964,8 +903,6 @@
         else if (a === 'god-mode') actGodMode();
         else if (a === 'auto-v') actAutoV();
         else if (a === 'apply-params') actApplyParams();
-        else if (a === 'read-level') actReadLevel();
-        else if (a === 'write-level') actWriteLevel();
         else if (a === 'cam-expanded') applyCameraPreset('expanded');
         else if (a === 'cam-wide') applyCameraPreset('wide');
         else if (a === 'cam-normal') applyCameraPreset('normal');
@@ -1016,6 +953,11 @@
         var overrideStyle = document.getElementById('cogmed-purple-override');
         if (overrideStyle) overrideStyle.remove();
         if (autoVInterval) clearInterval(autoVInterval);
+        
+        if (window.AutoPilot && originalGetResponseType) {
+             window.AutoPilot.getResponseType = originalGetResponseType;
+        }
+        
         window.__cogmedHackGui = null;
     }
 
@@ -1032,13 +974,13 @@
     log(TITLE + ' 起動', 'ok');
     log('テーマカラーを紫 (#9333ea) に強制適用しました', 'ok');
     log('閉じると「🟣 自由建築 V1.6」ボタンが残ります', 'info');
-    log('建築モード + カメラ + 値操作 + オートトレーニング + レベル改ざん 全部ここから', 'info');
+    log('建築モード + カメラ + 値操作 + オートトレーニング(V2) 全部ここから', 'info');
 
     if (window.__orbitControls) onCameraCapture();
 })();
         </script>
 
-        <a href="https://youtu.be/3BOwIbz6I3g?si=33BThiL_pzG9IxDL" target="_blank" rel="noopener noreferrer" class="copy-btn video-btn" aria-label="動画を見る">
+        <a href="https://youtu.be/3BOwIbz6I3g?si=uqfFX2XWLF5O8Cbn" target="_blank" rel="noopener noreferrer" class="copy-btn video-btn" aria-label="動画を見る">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             <span>動画を見る</span>
         </a>
@@ -1057,7 +999,7 @@
 
         <div class="footer">
             <div><span class="brand">中国制造与日本制造</span></div>
-            <div>開発元:不適切学生集団0909</div>
+            <div>開発元: 0909Group</div>
             <div style="margin-top:0.4rem;">提供: Deepseek＆Qwen</div>
         </div>
     </div>
